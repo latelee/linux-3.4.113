@@ -1516,9 +1516,11 @@ dm9000_probe(struct platform_device *pdev)
 		id_val |= (u32)ior(db, DM9000_PIDL) << 16;
 		id_val |= (u32)ior(db, DM9000_PIDH) << 24;
 
-		if (id_val == DM9000_ID)
+		if (id_val == DM9000_ID) {
+            dev_err(db->dev, "got id ok: 0x%08x\n", id_val);
 			break;
-		dev_err(db->dev, "read wrong id 0x%08x\n", id_val);
+          }
+		dev_err(db->dev, "read wrong id 0x%08x, try again...\n", id_val);
 	}
 
 	if (id_val != DM9000_ID) {

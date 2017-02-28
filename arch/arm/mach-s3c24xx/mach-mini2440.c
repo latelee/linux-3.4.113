@@ -246,6 +246,7 @@ static struct s3c24xx_mci_pdata mini2440_mmc_cfg __initdata = {
 /* NAND Flash on MINI2440 board */
 
 static struct mtd_partition mini2440_default_nand_part[] __initdata = {
+    #if 0
 	[0] = {
 		.name	= "u-boot",
 		.size	= SZ_256K,
@@ -266,6 +267,39 @@ static struct mtd_partition mini2440_default_nand_part[] __initdata = {
 	[3] = {
 		.name	= "root",
 		.offset	= SZ_256K + SZ_128K + 0x00500000,
+		.size	= MTDPART_SIZ_FULL,
+	},
+    #endif
+	[0] = {
+		.name	= "Boot Loader",
+		.size	= SZ_256K,
+		.offset	= 0,
+	},
+	[1] = {
+		.name	= "Parameters",
+		.size	= SZ_128K,
+		.offset	= SZ_256K,
+	},
+	[2] = {
+		.name	= "kernel",
+		/* 5 megabytes, for a kernel with no modules
+		 * or a uImage with a ramdisk attached */
+		.size	= 0x60 * SZ_64K,
+		.offset	= SZ_256K + SZ_128K,
+	},
+	[3] = {
+		.name	= "app",
+		.offset	= SZ_256K + SZ_128K + 0x60 * SZ_64K,
+		.size	= 0x100 * SZ_64K,
+	},
+	[4] = {
+		.name	= "reserve",
+		.offset	= SZ_256K + SZ_128K + 0x60 * SZ_64K + 0x100 * SZ_64K,
+		.size	= 0x100 * SZ_64K,
+	},
+	[5] = {
+		.name	= "Rootfs(yaffs2)",
+		.offset	= SZ_256K + SZ_128K + 0x60 * SZ_64K + 0x100 * SZ_64K + 0x100 * SZ_64K,
 		.size	= MTDPART_SIZ_FULL,
 	},
 };
@@ -476,6 +510,57 @@ static struct platform_device mini2440_led_backlight = {
 	},
 };
 
+static void platformdev_release(struct device* dev)
+{
+}
+
+static struct gpio_led gpio_leds[] = {
+	{
+		.name	= "led1",
+		.gpio	= 37, // GPB_5   GPIO_NO = Group * 32 + Id
+		.default_state	= LEDS_GPIO_DEFSTATE_ON, // default on
+		.active_low = 1, // low level == on
+		.default_trigger = "heartbeat", // test...
+	},
+	{
+		.name	= "led2",
+		.gpio	= 38, // GPB_6
+		.default_state	= LEDS_GPIO_DEFSTATE_ON, // default on
+		.active_low = 1, // low level == on
+        //.default_trigger = "timer", // test...
+	},
+	{
+		.name	= "led3",
+		.gpio	= 39, // GPB_7   GPIO_NO = Group * 32 + Id
+		.default_state	= LEDS_GPIO_DEFSTATE_ON, // default on
+		.active_low = 1, // low level == on
+		//.default_trigger = "heartbeat", // test...
+	},
+	{
+		.name	= "led4",
+		.gpio	= 40, // GPB_8
+		.default_state	= LEDS_GPIO_DEFSTATE_ON, // default on
+		.active_low = 1, // low level == on
+        .default_trigger = "timer", // test...
+	},
+};
+
+static struct gpio_led_platform_data gpio_led_info = {
+	.leds		= gpio_leds,
+	.num_leds	= ARRAY_SIZE(gpio_leds),
+};
+
+
+static struct platform_device leds_gpio = {
+	.name	= "leds-gpio",
+	.id		= -1,
+	.dev	= {
+		.platform_data = &gpio_led_info,
+		.release = platformdev_release,
+	},
+};
+
+
 /* AUDIO */
 
 static struct s3c24xx_uda134x_platform_data mini2440_audio_pins = {
@@ -520,10 +605,13 @@ static struct platform_device *mini2440_devices[] __initdata = {
 	&s3c_device_rtc,
 	&s3c_device_usbgadget,
 	&mini2440_device_eth,
-	&mini2440_led1,
+#if 0
+    &mini2440_led1,
 	&mini2440_led2,
 	&mini2440_led3,
 	&mini2440_led4,
+#endif
+    &leds_gpio,
 	&mini2440_button_device,
 	&s3c_device_nand,
 	&s3c_device_sdi,
@@ -635,11 +723,21 @@ static void __init mini2440_init(void)
 	struct mini2440_features_t features = { 0 };
 	int i;
 
-	printk(KERN_INFO "MINI2440: Option string mini2440=%s\n",
-			mini2440_features_str);
+	printk(KERN_INFO "MINI2440: Option string mini2440=%s GPB5: %d GPB6: %d\n",
+			mini2440_features_str, S3C2410_GPB(5), S3C2410_GPB(6));
 
 	/* Parse the feature string */
 	mini2440_parse_features(&features, mini2440_features_str);
+
+//////////////
+#if 0
+    gpio_request(S3C2410_GPB(5), "led1");
+    gpio_direction_output(S3C2410_GPB(5), 0); # 设置输出同时设置为低电平
+    
+    gpio_request(S3C2410_GPB(6), "led2");
+    gpio_direction_output(S3C2410_GPB(6), 0);
+    gpio_set_value(S3C2410_GPB(6), 0);
+#endif
 
 	/* turn LCD on */
 	s3c_gpio_cfgpin(S3C2410_GPC(0), S3C2410_GPC0_LEND);
@@ -694,7 +792,7 @@ static void __init mini2440_init(void)
 }
 
 
-MACHINE_START(MINI2440, "MINI2440")
+MACHINE_START(MINI2440, "MINI2440") // MINI2440
 	/* Maintainer: Michel Pollet <buserror@gmail.com> */
 	.atag_offset	= 0x100,
 	.map_io		= mini2440_map_io,
