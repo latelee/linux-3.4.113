@@ -245,7 +245,8 @@ static struct s3c24xx_mci_pdata mini2440_mmc_cfg __initdata = {
 
 /* NAND Flash on MINI2440 board */
 
-static struct mtd_partition mini2440_default_nand_part[] __initdata = {
+// no __initdata
+static struct mtd_partition mini2440_default_nand_part[] = {
     #if 0
 	[0] = {
 		.name	= "u-boot",
@@ -304,7 +305,8 @@ static struct mtd_partition mini2440_default_nand_part[] __initdata = {
 	},
 };
 
-static struct s3c2410_nand_set mini2440_nand_sets[] __initdata = {
+// no __initdata
+static struct s3c2410_nand_set mini2440_nand_sets[] = {
 	[0] = {
 		.name		= "nand",
 		.nr_chips	= 1,
@@ -313,8 +315,8 @@ static struct s3c2410_nand_set mini2440_nand_sets[] __initdata = {
 		.flash_bbt 	= 1, /* we use u-boot to create a BBT */
 	},
 };
-
-static struct s3c2410_platform_nand mini2440_nand_info __initdata = {
+// no __initdata
+static struct s3c2410_platform_nand mini2440_nand_info = {
 	.tacls		= 0,
 	.twrph0		= 25,
 	.twrph1		= 15,
