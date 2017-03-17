@@ -17,6 +17,7 @@
 #define __NAMEVAL_H__
 
 #include "yportenv.h"
+#include "yaffs_guts.h"
 
 int nval_del(struct yaffs_dev *dev, char *xb, int xb_size, const YCHAR * name);
 int nval_set(struct yaffs_dev *dev,

@@ -15,4 +15,5 @@ yaffs-y += yaffs_yaffs2.o
 yaffs-y += yaffs_bitmap.o
 yaffs-y += yaffs_summary.o
 yaffs-y += yaffs_verify.o
+yaffs-y += yaffs_endian.o
 

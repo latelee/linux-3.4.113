@@ -54,6 +54,10 @@
 #define YUCHAR unsigned char
 #define _Y(x)     x
 
+#ifndef Y_LOFF_T
+#define Y_LOFF_T loff_t
+#endif
+
 #define YAFFS_LOSTNFOUND_NAME		"lost+found"
 #define YAFFS_LOSTNFOUND_PREFIX		"obj"
 
